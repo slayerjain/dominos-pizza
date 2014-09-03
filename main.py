@@ -7,18 +7,19 @@ import sys
 def get_session():
 	response = urllib2.urlopen('https://pizzaonline.dominos.co.in/slot-machine/')
 	headers = response.info()
-
+	
 	cookies = Cookie.SimpleCookie()
 	cookies.load( headers['set-cookie'] )
 
 	return cookies['session_id'].value
+
 
 def get_coupon(session,myfile,success,failure):
 	data = {'session_id':session}
 	headers = {'X-Requested-With':'XMLHttpRequest'}
 	response = requests.post('https://pizzaonline.dominos.co.in/slot-machine/process-slot.php',data=data,headers=headers)
 	jsonResponse = json.loads(response.text)
-	
+
 	try:
 		myfile.write('<tr><td>' + jsonResponse['unique_coupon'] + '</td>')
 		myfile.write('<td>' + jsonResponse['coupon_description'] + '</td></tr>')
@@ -28,10 +29,8 @@ def get_coupon(session,myfile,success,failure):
 
 	sys.stdout.write('success : '+str(success)+' , failures : '+str(failure)+'\r')
 	sys.stdout.flush()
-
-	if jsonResponse['status'] == 0:
-		session = get_session()
-	get_coupon(session,myfile,success,failure)		
+	
+	return {"status":jsonResponse['status'], "success":success, "failure":failure}
 
 def create_file():
 	myfile = open('dominos_coupons.html','w+')
@@ -39,4 +38,20 @@ def create_file():
 	return myfile
 
 
-get_coupon(get_session(),create_file(),0,0)
+def main():
+	# create a new create_file
+	myFile = create_file()
+	session = get_session()
+	success = 0
+	failure = 0
+
+	while 1:
+	  response = get_coupon(session,myFile,success,failure)
+	  success = response['success']
+	  failure = response['failure']
+	  
+	  if response['status'] == 0 :
+		 session = get_session()
+	    
+	
+main()
