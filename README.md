@@ -1,6 +1,12 @@
 Dominos Slot Machine Hack
 =============================
 
-python script written to fetch dominos coupons
+to generate the coupons list, use
+```
+python main.py
+```
 
-run in command line
+coupons are saved into `dominos_coupons.html` 
+
+Important: script has infinite loop, if you want to stop press `Ctrl+C`
+
